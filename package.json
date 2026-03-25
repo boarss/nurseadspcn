@@ -1,0 +1,19 @@
+{
+  "name": "nurseada",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NurseAda — AI-Powered 24/7 Virtual Healthcare Assistant",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@nurseada/web",
+    "dev:api": "cd services/api && uvicorn main:app --reload --port 8000",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "packageManager": "pnpm@10.7.0",
+  "engines": {
+    "node": ">=20"
+  }
+}

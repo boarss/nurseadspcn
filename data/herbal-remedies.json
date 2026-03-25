@@ -1,0 +1,67 @@
+{
+  "remedies": [
+    {
+      "id": "1",
+      "name": "Bitter Leaf (Vernonia amygdalina)",
+      "localNames": { "yoruba": "Ewuro", "igbo": "Onugbu", "hausa": "Shuwaka" },
+      "conditions": ["Malaria prophylaxis", "Stomach ache", "Fever", "Diabetes support"],
+      "preparation": "Squeeze fresh leaves in water, sieve, and drink the extract. Can also boil leaves for 10 minutes.",
+      "evidenceLevel": "Moderate",
+      "warnings": "Not recommended during pregnancy. May interact with diabetes medications."
+    },
+    {
+      "id": "2",
+      "name": "Ginger (Zingiber officinale)",
+      "localNames": { "yoruba": "Ata ile", "igbo": "Jinja", "hausa": "Citta" },
+      "conditions": ["Nausea", "Inflammation", "Cold & flu", "Digestive issues"],
+      "preparation": "Grate fresh ginger root, steep in hot water for 5-10 minutes. Add honey to taste.",
+      "evidenceLevel": "Strong",
+      "warnings": "Large doses may cause heartburn. May interact with blood-thinning medications."
+    },
+    {
+      "id": "3",
+      "name": "Moringa (Moringa oleifera)",
+      "localNames": { "yoruba": "Ewe igbale", "igbo": "Okwe oyibo", "hausa": "Zogale" },
+      "conditions": ["Nutritional deficiency", "Fatigue", "Immune support", "Blood sugar regulation"],
+      "preparation": "Dry leaves and grind to powder. Add 1 teaspoon to meals, smoothies, or warm water.",
+      "evidenceLevel": "Strong",
+      "warnings": "May lower blood pressure. Avoid during pregnancy in large quantities."
+    },
+    {
+      "id": "4",
+      "name": "Neem (Azadirachta indica)",
+      "localNames": { "yoruba": "Dongoyaro", "igbo": "Dogonyaro", "hausa": "Darbejiya" },
+      "conditions": ["Skin infections", "Malaria", "Blood purification", "Dental hygiene"],
+      "preparation": "Boil leaves for 15 minutes, let cool, and drink. For skin, apply leaf paste directly.",
+      "evidenceLevel": "Moderate",
+      "warnings": "Do not use during pregnancy. Can cause liver damage in high doses."
+    },
+    {
+      "id": "5",
+      "name": "Turmeric (Curcuma longa)",
+      "localNames": { "yoruba": "Ata ile pupa", "igbo": "Nkwu nkwu", "hausa": "Gangamau" },
+      "conditions": ["Inflammation", "Joint pain", "Digestive health", "Immune support"],
+      "preparation": "Mix 1/2 teaspoon turmeric powder in warm milk or water. Add black pepper for better absorption.",
+      "evidenceLevel": "Strong",
+      "warnings": "May interact with blood thinners. Excessive use may cause stomach upset."
+    },
+    {
+      "id": "6",
+      "name": "Hibiscus (Hibiscus sabdariffa)",
+      "localNames": { "yoruba": "Zobo", "igbo": "Zobo", "hausa": "Zoborodo" },
+      "conditions": ["High blood pressure", "High cholesterol", "Digestive issues"],
+      "preparation": "Boil dried calyces in water for 15 minutes. Strain, chill, and drink as tea.",
+      "evidenceLevel": "Strong",
+      "warnings": "May significantly lower blood pressure. Use with caution if prone to hypotension."
+    },
+    {
+      "id": "7",
+      "name": "Scent Leaf (Ocimum gratissimum)",
+      "localNames": { "yoruba": "Efinrin", "igbo": "Nchanwu", "hausa": "Daidoya" },
+      "conditions": ["Respiratory infections", "Diarrhea", "Fever", "Wound healing"],
+      "preparation": "Brew fresh leaves as tea, or crush and apply topically to wounds.",
+      "evidenceLevel": "Moderate",
+      "warnings": "Safe in culinary amounts. High therapeutic doses lack long-term safety data."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# docker-compose.yml
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api:/app
+      - ./data:/data
+    environment:
+      - SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://supabase:8000}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      - supabase
+
+  # Note: A real Supabase local deployment requires multiple containers (Postgres, GoTrue, PostgREST, etc.)
+  # It is highly recommended to use the Supabase CLI (`supabase start`) for local development rather than raw docker-compose.
+  # This stub represents where the db service would integrate if running entirely through compose.
+  supabase:
+    image: supabase/postgres:15.1.0.147
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+    volumes:
+      - ./supabase/migrations:/docker-entrypoint-initdb.d
