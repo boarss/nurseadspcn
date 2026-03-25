@@ -1,62 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Leaf, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Leaf, AlertTriangle, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
-// Sample herbal remedies (will come from API/seed data)
-const SAMPLE_REMEDIES = [
-  {
-    id: "1",
-    name: "Bitter Leaf (Vernonia amygdalina)",
-    localNames: { yoruba: "Ewuro", igbo: "Onugbu", hausa: "Shuwaka" },
-    conditions: ["Malaria prophylaxis", "Stomach ache", "Fever", "Diabetes support"],
-    preparation: "Squeeze fresh leaves in water, sieve, and drink the extract. Can also boil leaves for 10 minutes.",
-    evidenceLevel: "Moderate",
-    warnings: "Not recommended during pregnancy. May interact with diabetes medications.",
-  },
-  {
-    id: "2",
-    name: "Ginger (Zingiber officinale)",
-    localNames: { yoruba: "Ata ile", igbo: "Jinja", hausa: "Citta" },
-    conditions: ["Nausea", "Inflammation", "Cold & flu", "Digestive issues"],
-    preparation: "Grate fresh ginger root, steep in hot water for 5-10 minutes. Add honey to taste.",
-    evidenceLevel: "Strong",
-    warnings: "Large doses may cause heartburn. May interact with blood-thinning medications.",
-  },
-  {
-    id: "3",
-    name: "Moringa (Moringa oleifera)",
-    localNames: { yoruba: "Ewe igbale", igbo: "Okwe oyibo", hausa: "Zogale" },
-    conditions: ["Nutritional deficiency", "Fatigue", "Immune support", "Blood sugar regulation"],
-    preparation: "Dry leaves and grind to powder. Add 1 teaspoon to meals, smoothies, or warm water.",
-    evidenceLevel: "Strong",
-    warnings: "May lower blood pressure. Avoid during pregnancy in large quantities.",
-  },
-  {
-    id: "4",
-    name: "Neem (Azadirachta indica)",
-    localNames: { yoruba: "Dongoyaro", igbo: "Dogonyaro", hausa: "Darbejiya" },
-    conditions: ["Skin infections", "Malaria", "Blood purification", "Dental hygiene"],
-    preparation: "Boil leaves for 15 minutes, let cool, and drink. For skin, apply leaf paste directly.",
-    evidenceLevel: "Moderate",
-    warnings: "Do not use during pregnancy. Can cause liver damage in high doses.",
-  },
-  {
-    id: "5",
-    name: "Turmeric (Curcuma longa)",
-    localNames: { yoruba: "Ata ile pupa", igbo: "Nkwu nkwu", hausa: "Gangamau" },
-    conditions: ["Inflammation", "Joint pain", "Digestive health", "Immune support"],
-    preparation: "Mix 1/2 teaspoon turmeric powder in warm milk or water. Add black pepper for better absorption.",
-    evidenceLevel: "Strong",
-    warnings: "May interact with blood thinners. Excessive use may cause stomach upset.",
-  },
-];
+interface Remedy {
+  id: string;
+  name: string;
+  localNames: Record<string, string>;
+  conditions: string[];
+  preparation: string;
+  evidenceLevel: string;
+  warnings: string;
+}
 
 export default function RemediesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [remedies, setRemedies] = useState<Remedy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filtered = SAMPLE_REMEDIES.filter(
+  useEffect(() => {
+    apiClient.getHerbalCatalog()
+      .then(data => setRemedies(data.remedies || []))
+      .catch(err => console.error("Error fetching catalog:", err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const filtered = remedies.filter(
     (r) =>
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.conditions.some((c) => c.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -101,7 +72,12 @@ export default function RemediesPage() {
 
       {/* ─── Remedy Cards ─────────────────────── */}
       <div className="space-y-4">
-        {filtered.map((remedy) => {
+        {isLoading && (
+          <div className="flex justify-center p-8">
+            <Loader2 className="animate-spin text-brand-500" size={32} />
+          </div>
+        )}
+        {!isLoading && filtered.map((remedy) => {
           const isExpanded = expandedId === remedy.id;
           return (
             <div
@@ -202,7 +178,7 @@ export default function RemediesPage() {
           );
         })}
 
-        {filtered.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="text-center py-12">
             <Leaf size={48} className="mx-auto mb-4" style={{ color: "var(--color-text-muted)" }} />
             <p style={{ color: "var(--color-text-secondary)" }}>No remedies found for &ldquo;{searchQuery}&rdquo;</p>

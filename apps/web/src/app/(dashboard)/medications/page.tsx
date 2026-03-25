@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Pill, Bell, AlertCircle, Plus, Trash2, Search } from "lucide-react";
+import { Pill, Bell, AlertCircle, Plus, Trash2, Search, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
 interface Reminder {
   id: string;
@@ -46,12 +47,20 @@ export default function MedicationsPage() {
     setReminders((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const checkInteractions = () => {
+  const [isChecking, setIsChecking] = useState(false);
+
+  const checkInteractions = async () => {
     if (!drug1.trim() || !drug2.trim()) return;
-    // TODO: Wire up to FastAPI backend
-    setInteractionResult(
-      `⚠️ Interaction check for "${drug1}" and "${drug2}" is in scaffold mode. Once connected to the backend, this will query the CDSS drug-interaction database for real-time results.`
-    );
+    setIsChecking(true);
+    setInteractionResult(null);
+    try {
+      const data = await apiClient.checkInteractions([drug1.trim(), drug2.trim()]);
+      setInteractionResult(data.summary);
+    } catch (err) {
+      setInteractionResult("⚠️ Error connecting to the server. Please ensure the backend is running.");
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   return (
@@ -205,14 +214,14 @@ export default function MedicationsPage() {
             </div>
             <button
               onClick={checkInteractions}
-              disabled={!drug1.trim() || !drug2.trim()}
+              disabled={!drug1.trim() || !drug2.trim() || isChecking}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-40"
               style={{
                 background: "var(--color-brand-500)",
                 color: "var(--color-text-inverse)",
               }}
             >
-              <Search size={16} />
+              {isChecking ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
               Check Interactions
             </button>
           </div>

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional
 from models.schemas import ChatRequest, ChatResponse
 import uuid
+from services.llm_gateway import llm_gateway
 
 router = APIRouter()
 
@@ -14,13 +15,10 @@ async def chat_endpoint(request: ChatRequest):
     """
     conversation_id = request.conversation_id or str(uuid.uuid4())
     
-    # Simulate LLM processing
-    reply = (
-        f"Thank you for your message: '{request.message}'. "
-        f"I am currently in scaffold mode. Once the LLM gateway is connected, "
-        f"I will provide evidence-based healthcare guidance.\n\n"
-        f"⚠️ *Not medical advice.*"
-    )
+    messages = [{"role": "user", "content": request.message}]
+    
+    # Process through the unified AI gateway
+    reply = await llm_gateway.generate_response(messages)
     
     return ChatResponse(
         reply=reply,

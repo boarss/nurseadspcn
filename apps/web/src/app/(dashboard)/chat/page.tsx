@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Bot, User, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
 interface Message {
   id: string;
@@ -43,19 +44,27 @@ export default function ChatPage() {
     setInput("");
     setIsLoading(true);
 
-    // TODO: Wire up to FastAPI backend via api.ts sendMessage()
-    // For now, simulate a response
-    setTimeout(() => {
+    try {
+      const response = await apiClient.chat(input.trim());
       const reply: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content:
-          "Thank you for sharing that with me. I'm currently in scaffold mode — once the backend is connected, I'll provide accurate health guidance based on your symptoms.\n\n⚠️ *This is not medical advice. Please consult a healthcare professional for urgent concerns.*",
+        content: response.reply,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, reply]);
+    } catch (error) {
+      console.error(error);
+      const errorReply: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Sorry, I am having trouble connecting to the network right now. Please try again later.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorReply]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
