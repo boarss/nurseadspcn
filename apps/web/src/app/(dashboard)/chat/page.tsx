@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Paperclip, Bot, User, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
+import { createClient } from "@/lib/supabase/client";
 
 interface Message {
   id: string;
@@ -23,8 +24,15 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const supabase = createClient();
+
+  // Initialize conversation ID once
+  useEffect(() => {
+    setConversationId(crypto.randomUUID());
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -33,10 +41,11 @@ export default function ChatPage() {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
+    const currentInput = input.trim();
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input.trim(),
+      content: currentInput,
       timestamp: new Date(),
     };
 
@@ -45,20 +54,40 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await apiClient.chat(input.trim());
-      const reply: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: response.reply,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, reply]);
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || "mock_token";
+
+      // Prepare assistant message shell
+      const assistantMessageId = crypto.randomUUID();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
+      ]);
+
+      // Process streaming response
+      const stream = apiClient.chatStream(currentInput, token, conversationId);
+      
+      for await (const chunk of stream) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          )
+        );
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Chat error:", error);
       const errorReply: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Sorry, I am having trouble connecting to the network right now. Please try again later.",
+        content: "\n\n[System Interface Error: Could not connect to the primary neural network. Please check your connection or API keys.]",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorReply]);
@@ -108,7 +137,10 @@ export default function ChatPage() {
             className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
           >
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                msg.role === "assistant" && msg.id !== "welcome" && isLoading && msg.content === "" 
+                ? "animate-pulse" : ""
+              }`}
               style={{
                 background: msg.role === "assistant" ? "var(--color-brand-100)" : "var(--color-surface-secondary)",
                 color: msg.role === "assistant" ? "var(--color-brand-700)" : "var(--color-text-secondary)",
@@ -125,30 +157,18 @@ export default function ChatPage() {
                 borderBottomRightRadius: msg.role === "user" ? "4px" : undefined,
               }}
             >
-              {msg.content}
+              {msg.content === "" && isLoading ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              ) : (
+                msg.content
+              )}
             </div>
           </div>
         ))}
-
-        {isLoading && (
-          <div className="flex gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "var(--color-brand-100)", color: "var(--color-brand-700)" }}
-            >
-              <Bot size={16} />
-            </div>
-            <div
-              className="px-4 py-3 rounded-2xl flex items-center gap-2"
-              style={{ background: "var(--color-surface-secondary)" }}
-            >
-              <Loader2 size={16} className="animate-spin" style={{ color: "var(--color-brand-500)" }} />
-              <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                NurseAda is thinking...
-              </span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ─── Input ────────────────────────────── */}
@@ -191,7 +211,7 @@ export default function ChatPage() {
               color: "var(--color-text-inverse)",
             }}
           >
-            <Send size={18} />
+            {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
           </button>
         </div>
         <p className="text-center mt-2" style={{ fontSize: "0.65rem", color: "var(--color-text-muted)" }}>
